@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 
 import Papa from "papaparse";
+import { useEffect, useState } from "react";
 import request from "request";
 import Sidebar from "../components/Sidebar";
 
@@ -16,7 +17,20 @@ const PAPAPARSE_OPTIONS = {
   delimiter: ",",
 };
 
-function Home({ animals }) {
+function Home() {
+  const [animals, setAnimals] = useState([]);
+
+  useEffect(() => {
+    Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vQt1K2h_Jf5Os6z8uz9RqE2lR8OF5om3WVj7uqVWP7PxxLhpGnBlLfCaa9Nst7cvCqwzjiW0xy7wL5O/pub?gid=0&single=true&output=csv", {
+      download: true,
+      header: true,
+      delimiter: ",",
+      complete: (results) => {
+        setAnimals(results.data)
+      }
+    })
+  }, [])
+
   return (
     <>
       <Sidebar animals={animals} />
@@ -91,29 +105,3 @@ function Home({ animals }) {
 }
 
 export default Home;
-
-export async function getServerSideProps() {
-  const animals = await new Promise((resolve, reject) => {
-    const parseStream = Papa.parse(Papa.NODE_STREAM_INPUT, PAPAPARSE_OPTIONS);
-    const dataStream = request.get(ANIMAL_GS_LINK).pipe(parseStream);
-
-    let csvData = [];
-    parseStream.on("data", (chunk) => {
-      csvData.push(chunk);
-    });
-
-    dataStream.on("finish", () => {
-      resolve(csvData);
-    });
-
-    dataStream.on('error', function(err) {
-      reject(err)
-    })
-  });
-
-  return {
-    props: {
-      animals: animals.map(animal => ({ name: animal.name, slug: animal.slug })),
-    },
-  };
-}
