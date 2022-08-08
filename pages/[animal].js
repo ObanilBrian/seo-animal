@@ -17,12 +17,12 @@ const PAPAPARSE_OPTIONS = {
 };
 
 function Animal({ animals, currentAnimal }) {
-
+  const title = `Animals - ${currentAnimal.name}`;
   return (
     <>
       <Head>
-        <title>Animals - {currentAnimal.name}</title>
-        <meta name="description" content={`This is a page for ${currentAnimal.name}`}></meta>
+        <title>{title}</title>
+        <meta name="description" content={`This is a page for ${currentAnimal.name}`} />
       </Head>
       <Sidebar animals={animals} />
       <div className={styles.container}>
